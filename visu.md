@@ -1,4 +1,5 @@
-Palvelintenhallinta - h1 / Ville Suikki
+Palvelintenhallinta, ph13 - Palvelinten hallinta ICI001AS3A-3013
+h1 / Ville Suikki
 
 Alussa oli todella kovia haasteita saada oikeaa virtuaaliympäristöä pystyyn kun Macbookki on aivan pakasta vedetty 2026v malli, mutta jäätävän työstämisen, hiusten kiskomisen ja tekoälyn kanssakin sparraamisen jälkeen, löysin vasta sellaiset ohjeet että sain ympäristön pystyyn! 
 
@@ -28,3 +29,5 @@ Ansible- eli Automaatiotyökalu. Sen avulla voidaan hallita useita palvelimia ke
 
 
 Ansiblen konffattuani loin playbook-tiedoston mutta ensin loin nanolla hello.yml sisällön, jolla ansiblelle välittyy tieto siitä mitä tehtäviä ajetaan ja milläkin koneilla. Tiedostoon määrittelin nimen jossa määritellään tehtävän kuvaus, hosts, tasks, debug ja msg kohdat jotka määrittivät tulostetettavan viestin. Tämän kun sain tallennettua ajoin komennon ansible-playbook -i hosts hello.yml ja sain onnistuneesti tulosteen "Hei maailma!" 
+
+
