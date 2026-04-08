@@ -1,1 +1,62 @@
+H2 - Palvelinten hallinta - ICI001AS3A-3013 - Ville Suikki
+
+Tiivistelmät
+
+Karvinen 2026: Sudo without password
+  - Sudoers-tiedostolla voidaan sallia tietylle käyttäjälle sudo-komennon käyttö ilman salasanaa.
+  - Tiedosto luodaan hakemistoon /etc/sudoers.d/ ja siihen kirjoitetaan oma rivi:
+    kayttaja ALL=(ALL) NOPASSWD: ALL
+  - Tiedoston oikeellisuus tarkistetaan komennolla: sudo visudo -c -f /etc/sudoers.d/kayttaja
+
+OMana huomiona tässä se että miksei muokata suoraan /etc/sudoers tiedostoa? Virhe mielestäni siinä että erillinen tiedosto turvallisempi, koska virhe siinä ei riko koko sudo-määritelmätiedostoa.
+
+
+Munroe 2006 xkcd 149 - Sandwich
+
+  - Hauska meemi jossa näytetään sudon vahvuus jolla toisen osapuolen saa tekemään mitä vain sudo komentoa käyttämällä.
+  - Tiivistää hyvin sudon merkityksen. Sudo käyttäjällä oikeudet tehdäö asioita joita normaalisti ei ole. 
+
+Omana huomiona huomina se että meemi muistuttaa hyvin siitä mitkä mahdollisuudeyt ja samalla vastuu sudo käyttäjällä on. 
+
+
+Karvinen 2026: Passwordless Sudo with Ansible
+
+  - Ansiblea varten tarvitaan tunnus jolla on sudo oikeudet ilman salasanaa.
+  - SSH-avainparipohjainen kirjautuminen mahdollistaa Ansiblen käytön ilman että käyttäjältä vaaditaan toimenoiteitä
+  - Kun yhdistetään paswordless sudo sekä SSH-avain, saadaan täysin automatisoitu hallintaympäristö.
+
+Omana huomiona tässä se, että turvallisuuden näkövinkkelistä olisi hyvä rajata sudo oikeuksia tarkasti.
+
+
+Ansible-doc:
+
+copy
+  Kopioi tiedostoja hallintakoneelta orjalle
+  src: lahdetiedosto | dest: kohdehakemisto/tiedosto | owner/group/mode: oikeudet 
+  Esimerkkinä: Copy: src foo.txt dest: /home/antero/foo.txt mode: "0640"
+
+apt
+  - Hallitsee debian/ubuntu paketteja
+  - name. paketti tai lista paketeista | state: present/absent | update_cache: true paivittaa pakettiluettelon
+
+file
+  - hallitsee tiedostoja, hakemistoja ja symbolisia linkeejä.
+  -	path: polku | state: file/directory/absent | owner/group/mode: oikeudet
+
+user
+  - Hallitsee Linux käyttäjätunnuksia
+  -	name: kayttajanimi | create_home: true/false | shell: /bin/bash | state: present/absent
+
+athorized key
+  - Lisää SSH julkisavaimia eri käyttäjille
+  - -	user: kayttajanimi | key: julkinen avain (voidaan lukea tiedostosta lookup('file', ...))
+
+
+A) Tässä luotiin ansibleuser-tunnus joka voi käyttää sudoa ilman salasanaa ja SSH-avainkirjautuminen automatisoitiin.
+
+  - Luotiin uusi käyttäjä: sudo adduser ansibleuser
+  - Lisättiin sudo ryhmääm: sudo adduser anbsibleuser sudo
+  - Luotiin suoers tiedosto: etc/suoders.d/ansibleuser jonka sisältö oli "ALL=(ALL) NOPASSWD: ALL"
+  - Luotiin SSH avainpari komennolla ssh-keygen -t ed25519
+  - Tämän jälkeen kopioitiin julkinen avain orjalle komennolla ssh-copy-id@iposoite
 
