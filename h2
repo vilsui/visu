@@ -58,5 +58,5 @@ A) Tässä luotiin ansibleuser-tunnus joka voi käyttää sudoa ilman salasanaa 
   - Lisättiin sudo ryhmääm: sudo adduser anbsibleuser sudo
   - Luotiin suoers tiedosto: etc/suoders.d/ansibleuser jonka sisältö oli "ALL=(ALL) NOPASSWD: ALL"
   - Luotiin SSH avainpari komennolla ssh-keygen -t ed25519
-  - Tämän jälkeen kopioitiin julkinen avain orjalle komennolla ssh-copy-id@iposoite
+  - Tämän jälkeen kopioin julkisen avaimen orjalle komennolla ssh-copy-id@iposoite
 
