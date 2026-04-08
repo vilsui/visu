@@ -52,11 +52,46 @@ athorized key
   - -	user: kayttajanimi | key: julkinen avain (voidaan lukea tiedostosta lookup('file', ...))
 
 
-A) Tässä luotiin ansibleuser-tunnus joka voi käyttää sudoa ilman salasanaa ja SSH-avainkirjautuminen automatisoitiin.
+A) Tässä loin ansibleuser-tunnuksen joka voi käyttää sudoa ilman salasanaa ja SSH-avainkirjautuminen automatisoitiin.
 
-  - Luotiin uusi käyttäjä: sudo adduser ansibleuser
-  - Lisättiin sudo ryhmääm: sudo adduser anbsibleuser sudo
-  - Luotiin suoers tiedosto: etc/suoders.d/ansibleuser jonka sisältö oli "ALL=(ALL) NOPASSWD: ALL"
-  - Luotiin SSH avainpari komennolla ssh-keygen -t ed25519
+  - Loin uuden käyttäjän komennolla: sudo adduser ansibleuser
+  - Lisäsin sudo ryhmääm komennolla: sudo adduser anbsibleuser sudo
+  - Loin suoders tiedoston komennolla: etc/suoders.d/ansibleuser jonka sisältö oli "ALL=(ALL) NOPASSWD: ALL"
+  - Loin SSH avainparin komennolla: ssh-keygen -t ed25519
   - Tämän jälkeen kopioin julkisen avaimen orjalle komennolla ssh-copy-id@iposoite
 
+
+B) Antero
+
+Tässä tehtävässä loin Antero nimisen käyttäjän Ansiblella SSH avaimineen automaagisesti.
+  - Loin SSH avainparin Anterolle komennolla: SSH-keygen -t ed25519 -f ~/.ssh/antero_key
+  - Loin roolin komennolla roles/antero/tasks/main.yml
+  - Rooli luo käyttäjän (usert-moduuli) ja lisää SSH-avaimen (authorized_key-moduulin)
+  - Ajoin tämnä jälkeen Playbookin onnistuneesti jonka tuloksena sain: ok=3, changed=1, failed=0
+
+C) package
+
+Tässä kohdassa asensin paketit tree ja curl Ansiblella apt moduukliulla.
+  - Ensimmäisenä loin roolin: roles/packages/tasks/main.yml komennolla.
+  - APT-moduuli oheisilla tiedoilla: name: tree, curl], state: present, update_cache: true
+  -	Playbookin sain ajettua onnistuneesti: ok=4, changed=1, failed=0
+
+D) File
+
+Tässä kohdassa kirjoitin seampirivisen tiedoston orjalle Ansiblella määritettyjen oikeuksien puitteissa.
+  - Loin roolin komennolla: roles/tiedosto/tasks/main.yml ja roles/tiedosto/files/viesti.txt
+  - copy moduuli: src: viesti txt, dest: /home/antero/viesti.txt, owner antero, group: antero, mode: '0640'
+  - tämän jälkeen kun ajopin playbookin niin sain onnistuneesti: ok=5, changed=1, failed=0
+
+Oikeuksien selitys: 0640 = -rw-r----
+  - omistajan toimi Antero: RW- = jolloin voi lukea ja kirjoittaa tiedostoa
+  - ryhmä: r-- = voi ainoastaan lukea tiedostao
+  - muut käyttäjät: --- = ei mitään oikeuksia. Tässä esim visu käyttäjäni sai "permission denied"
+
+e) Jotain muuta: lineinfile-moduuli
+
+Käytin tässä lineinfile-moduulia jota niin kuin tehtävänannossa käytiin lävitse, ei käyty lävitse. Tämä kohta varmisti että tietty rivi on olemassa tiedostossa.
+  -	Loin roolin: roles/extrat/tasks/main.yml
+  -	lineinfile-moduuli: path: /home/antero/viesti.txt, line: 'Tama rivi on lisatty lineinfile-moduulilla.', state: present
+  -	Hyodyllinen kun tiedostoon pitää lisata yksittainen rivi ilman koko tiedoston korvaamista
+  -	Idempotenttisuus: jos rivi on jo olemassa, Ansible ei tee muutoksia (ok eikä changed)
