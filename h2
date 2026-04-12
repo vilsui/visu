@@ -1,97 +1,217 @@
-H2 - Palvelinten hallinta - ICI001AS3A-3013 - Ville Suikki
+h2 Voileipä
+Ville Suikki
+8.4.2026
+Palvelinten hallinta - ICI001AS3A-3013 - to 11:00
 
-Tiivistelmät
-
+x) Tiivistelmat
 Karvinen 2026: Sudo without password
-  - Sudoers-tiedostolla voidaan sallia tietylle käyttäjälle sudo-komennon käyttö ilman salasanaa.
-  - Tiedosto luodaan hakemistoon /etc/sudoers.d/ ja siihen kirjoitetaan oma rivi:
-    kayttaja ALL=(ALL) NOPASSWD: ALL
-  - Tiedoston oikeellisuus tarkistetaan komennolla: sudo visudo -c -f /etc/sudoers.d/kayttaja
-
+- Sudoers-tiedostolla voidaan sallia tietylle käyttäjälle sudo-komennon käyttö ilman salasanaa
+- Tiedosto luodaan hakemistoon /etc/sudoers.d/ ja siihen kirjoitetaan rivi: kayttaja ALL=(ALL) NOPASSWD: ALL
+- Tiedoston oikeellisuus tarkistetaan komennolla: sudo visudo -c -f /etc/sudoers.d/kayttaja
 OMana huomiona tässä se että miksei muokata suoraan /etc/sudoers tiedostoa? Virhe mielestäni siinä että erillinen tiedosto turvallisempi, koska virhe siinä ei riko koko sudo-määritelmätiedostoa.
 
-
-Munroe 2006 xkcd 149 - Sandwich
-
-  - Hauska meemi jossa näytetään sudon vahvuus jolla toisen osapuolen saa tekemään mitä vain sudo komentoa käyttämällä.
-  - Tiivistää hyvin sudon merkityksen. Sudo käyttäjällä oikeudet tehdäö asioita joita normaalisti ei ole. 
-
-Omana huomiona huomina se että meemi muistuttaa hyvin siitä mitkä mahdollisuudeyt ja samalla vastuu sudo käyttäjällä on. 
-
+Munroe 2006: xkcd 149 - Sandwich
+- Meemi jossa sudo-komento saa toisen osapuolen tekemään mitä vain
+- Tiivistää hyvin sudon merkityksen: sudo-käyttäjällä on oikeudet tehdä asioita, joita normaalisti ei voi
+Omana huomiona huomina se, että meemi muistuttaa hyvin siitä mitkä mahdollisuudet ja samalla vastuu sudo käyttäjällä on.
 
 Karvinen 2026: Passwordless Sudo with Ansible
-
-  - Ansiblea varten tarvitaan tunnus jolla on sudo oikeudet ilman salasanaa.
-  - SSH-avainparipohjainen kirjautuminen mahdollistaa Ansiblen käytön ilman että käyttäjältä vaaditaan toimenoiteitä
-  - Kun yhdistetään paswordless sudo sekä SSH-avain, saadaan täysin automatisoitu hallintaympäristö.
+- Ansiblea varten tarvitaan tunnus, jolla on sudo-oikeudet ilman salasanaa
+- SSH-avainpohjainen kirjautuminen mahdollistaa Ansiblen käytön ilman käyttäjän toimenpiteitä
+- Yhdistämällä passwordless sudo ja SSH-avain saadaan täysin automatisoitu hallintaympäristö
 
 Omana huomiona tässä se, että turvallisuuden näkövinkkelistä olisi hyvä rajata sudo oikeuksia tarkasti.
 
+ansible-doc copy
+- Kopioi tiedostoja hallintakoneelta orjalle
+- src: lähdetiedosto | dest: kohdetiedosto | owner/group/mode: oikeudet
+- Esimerkki: copy: src: foo.txt dest: /home/antero/foo.txt mode: "0640"
 
-Ansible-doc:
-
-copy
-  Kopioi tiedostoja hallintakoneelta orjalle
-  src: lahdetiedosto | dest: kohdehakemisto/tiedosto | owner/group/mode: oikeudet 
-  Esimerkkinä: Copy: src foo.txt dest: /home/antero/foo.txt mode: "0640"
-
-apt
-  - Hallitsee debian/ubuntu paketteja
-  - name. paketti tai lista paketeista | state: present/absent | update_cache: true paivittaa pakettiluettelon
-
-file
-  - hallitsee tiedostoja, hakemistoja ja symbolisia linkeejä.
-  -	path: polku | state: file/directory/absent | owner/group/mode: oikeudet
-
-user
-  - Hallitsee Linux käyttäjätunnuksia
-  -	name: kayttajanimi | create_home: true/false | shell: /bin/bash | state: present/absent
-
-athorized key
-  - Lisää SSH julkisavaimia eri käyttäjille
-  - -	user: kayttajanimi | key: julkinen avain (voidaan lukea tiedostosta lookup('file', ...))
+ 
+ 
+ 
 
 
-A) Tässä loin ansibleuser-tunnuksen joka voi käyttää sudoa ilman salasanaa ja SSH-avainkirjautuminen automatisoitiin.
-
-  - Loin uuden käyttäjän komennolla: sudo adduser ansibleuser
-  - Lisäsin sudo ryhmääm komennolla: sudo adduser anbsibleuser sudo
-  - Loin suoders tiedoston komennolla: etc/suoders.d/ansibleuser jonka sisältö oli "ALL=(ALL) NOPASSWD: ALL"
-  - Loin SSH avainparin komennolla: ssh-keygen -t ed25519
-  - Tämän jälkeen kopioin julkisen avaimen orjalle komennolla ssh-copy-id@iposoite
 
 
-B) Antero
 
-Tässä tehtävässä loin Antero nimisen käyttäjän Ansiblella SSH avaimineen automaagisesti.
-  - Loin SSH avainparin Anterolle komennolla: SSH-keygen -t ed25519 -f ~/.ssh/antero_key
-  - Loin roolin komennolla roles/antero/tasks/main.yml
-  - Rooli luo käyttäjän (usert-moduuli) ja lisää SSH-avaimen (authorized_key-moduulin)
-  - Ajoin tämnä jälkeen Playbookin onnistuneesti jonka tuloksena sain: ok=3, changed=1, failed=0
 
-C) package
 
-Tässä kohdassa asensin paketit tree ja curl Ansiblella apt moduukliulla.
-  - Ensimmäisenä loin roolin: roles/packages/tasks/main.yml komennolla.
-  - APT-moduuli oheisilla tiedoilla: name: tree, curl], state: present, update_cache: true
-  -	Playbookin sain ajettua onnistuneesti: ok=4, changed=1, failed=0
 
-D) File
 
-Tässä kohdassa kirjoitin seampirivisen tiedoston orjalle Ansiblella määritettyjen oikeuksien puitteissa.
-  - Loin roolin komennolla: roles/tiedosto/tasks/main.yml ja roles/tiedosto/files/viesti.txt
-  - copy moduuli: src: viesti txt, dest: /home/antero/viesti.txt, owner antero, group: antero, mode: '0640'
-  - tämän jälkeen kun ajopin playbookin niin sain onnistuneesti: ok=5, changed=1, failed=0
 
-Oikeuksien selitys: 0640 = -rw-r----
-  - omistajan toimi Antero: RW- = jolloin voi lukea ja kirjoittaa tiedostoa
-  - ryhmä: r-- = voi ainoastaan lukea tiedostao
-  - muut käyttäjät: --- = ei mitään oikeuksia. Tässä esim visu käyttäjäni sai "permission denied"
 
+
+ansible-doc apt
+- Hallitsee Debian/Ubuntu-paketteja
+- name: paketti tai lista | state: present/absent | update_cache: true päivittää pakettiluettelon
+ 
+ 
+ 
+ansible-doc file
+- Hallitsee tiedostoja, hakemistoja ja symbolisia linkkejä
+- path: polku | state: file/directory/absent | owner/group/mode: oikeudet
+
+ 
+ 
+ 
+ansible-doc user
+- Hallitsee Linux-käyttäjätunnuksia
+- name: käyttäjänimi | create_home: true/false | shell: /bin/bash | state: present/absent
+
+ 
+ 
+ 
+
+ansible-doc authorized_key
+- Lisää SSH-julkisavaimia käyttäjille
+- user: käyttäjänimi | key: julkinen avain (voidaan lukea tiedostosta lookup('file', ...))
+
+ 
+ 
+---
+
+a) Sudoless
+
+Loin visu-käyttäjälle sudoers-tiedoston joka sallii sudon ilman salasanaa.
+
+    sudo visudo -f /etc/sudoers.d/visu
+    (kirjoitin: visu ALL=(ALL) NOPASSWD: ALL)
+
+Tarkistin tiedoston sisällön:
+    sudo cat /etc/sudoers.d/visu
+    visu ALL=(ALL) NOPASSWD: ALL
+
+Testasin että sudo toimii ilman salasanaa:
+
+    sudo echo "Sudo toimii ilman salasanaa!"
+    Sudo toimii ilman salasanaa!
+
+ 
+
+
+
+
+
+
+b) Antero
+Loin Antero-käyttäjän Ansiblella SSH-avaimineen automaattisesti.
+Ensin loin SSH-avainparin Anterolle:
+    ssh-keygen -t ed######-f ~/.ssh/antero_key
+Roolin sisältö:
+    cat roles/antero/tasks/main.yml
+    - name: Luo kayttaja Antero
+      user:
+        name: antero
+        create_home: true
+        shell: /bin/bash
+        state: present
+
+    - name: Lisaa SSH-avain Anterolle
+      authorized_key:
+        user: antero
+        key: "{{ lookup('file', '~/.ssh/antero_key.pub') }}"
+        state: present
+
+Ajoin playbookin:
+    ansible-playbook -i hosts site.yml
+    localhost : ok=6 changed=2 unreachable=0 failed=0
+
+Testasin että käyttäjä on olemassa:
+    id antero
+    uid=1004 (antero) gid=1004 (antero) groups=1004 (antero)
+ 
+
+c) Package
+Asensin paketit tree ja curl Ansiblella apt-moduulilla.
+Roolin sisältö:
+    cat roles/packages/tasks/main.yml
+    - name: Asenna paketit
+      apt:
+        name:
+          - tree
+          - curl
+        state: present
+        update_cache: true
+
+Ajoin playbookin: ansible-playbook -i hosts site.yml
+    PLAY RECAP
+    localhost : ok=6 changed=2 unreachable=0 failed=0
+Testasin että paketit asentuivat:
+    which tree
+    /usr/bin/tree
+    which curl
+    /usr/bin/curl
+    tree --version
+    tree v2.2.1 ...
+
+ 
+ d) File
+Kirjoitin useampirivisen tiedoston orjalle Ansiblella määritetyillä oikeuksilla.
+Roolin sisältö:
+    cat roles/tiedosto/tasks/main.yml
+    - name: Kopioi tiedosto orjalle
+      copy:
+        src: viesti.txt
+        dest: /home/antero/viesti.txt
+        owner: antero
+        group: antero
+        mode: "0640"
+ 
+
+Ajoin playbookin:
+    ansible-playbook -i hosts site.yml
+    
+    PLAY RECAP
+    localhost : ok=6 changed=2 unreachable=0 failed=0
+ 
+
+Tarkistin tiedoston sisällön ja oikeudet:
+
+    sudo cat /home/antero/viesti.txt
+    Tämä on Ansiblen kirjoittama tiedosto.
+    Toinen rivi tassa.
+    Kolmas rivi viimeiseksi.
+
+    sudo ls -la /home/antero/viesti.txt
+    -rw-r----- 1 antero antero 72 Apr 9 12:00 /home/antero/viesti.txt
+
+Oikeuksien selitys: 0640 = -rw-r-----
+- Omistaja (antero): rw- = voi lukea ja kirjoittaa
+- Ryhmä (antero): r-- = voi ainoastaan lukea
+- Muut (esim. visu): --- = ei mitään oikeuksia
+
+Todistin tämän ajamalla komennon visu-käyttäjänä:
+    cat /home/antero/viesti.txt
+    cat: /home/antero/viesti.txt: Permission denied
+ 
 e) Jotain muuta: lineinfile-moduuli
+Käytin lineinfile-moduulia jota ei ole kurssilla käsitelty.
+Se varmistaa, että tietty rivi on olemassa tiedostossa
+ilman että koko tiedosto korvataan.
 
-Käytin tässä lineinfile-moduulia jota niin kuin tehtävänannossa käytiin lävitse, ei käyty lävitse. Tämä kohta varmisti että tietty rivi on olemassa tiedostossa.
-  -	Loin roolin: roles/extrat/tasks/main.yml
-  -	lineinfile-moduuli: path: /home/antero/viesti.txt, line: 'Tama rivi on lisatty lineinfile-moduulilla.', state: present
-  -	Hyodyllinen kun tiedostoon pitää lisata yksittainen rivi ilman koko tiedoston korvaamista
-  -	Idempotenttisuus: jos rivi on jo olemassa, Ansible ei tee muutoksia (ok eikä changed)
+Roolin sisältö:
+    cat roles/extrat/tasks/main.yml
+    - name: Lisaa rivi tiedostoon lineinfile-moduulilla
+      lineinfile:
+        path: /home/antero/viesti.txt
+        line: "Tama rivi on lisatty lineinfile-moduulilla."
+        state: present
+
+Ajoin playbookin:
+    ansible-playbook -i hosts site.yml
+    PLAY RECAP
+ 
+    localhost : ok=6 changed=2 unreachable=0 failed=0
+
+Tarkistin että rivi ilmestyi tiedostoon:
+    sudo cat /home/antero/viesti.txt
+    Tama on Ansiblen kirjoittama tiedosto.
+    Toinen rivi tassa.
+    Kolmas rivi lopuksi.
+    Tama rivi on lisatty lineinfile-moduulilla.
+
+Idempotenttisuus: jos rivi on jo olemassa, Ansible ei tee muutoksia
+(ok eikä changed).
+
+ 
