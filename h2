@@ -28,8 +28,7 @@ ansible-doc copy
 - Esimerkki: copy: src: foo.txt dest: /home/antero/foo.txt mode: "0640"
 
  
- 
- 
+ https://github.com/vilsui/visu/blob/main/ensimmo%CC%88inenb%20kuva%20options%20dest.png 
 
 
 
