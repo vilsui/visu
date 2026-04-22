@@ -1,0 +1,48 @@
+H4, Pizza Fantasia, PostgreSQL-konfiguraation hallinta Ansiblella
+Tekijä: Ville Suikki
+Ympäristö: Debian/Ubuntu, Ansible, PostgreSQL
+
+a & b) PostgreSQL:n asennus ja perusasetukset
+Aloitin komennolla sudo apt install postgresql -y mutta näyttikin siltä että olin sen jo asentanut 
+
+Aluksi Ansible-playbook postgresql_setup.yml, joka varmistaa PostgreSQL-paketin asennuksen. 
+Playbook ajettiin paikallisesti hallintakoneella.
+
+  
+  
+
+[Tähän screenshot: Ensimmäinen onnistunut ansible-playbook ajo]
+
+c) Konfiguraation muuttaminen
+Tehtävässä muokattiin postgresql.conf-tiedostoa hallintakoneella. Asetus #log_connections = off muutettiin muotoon log_connections = on. Ansible-playbookiin lisättiin copy-moduuli, joka vie muokatun tiedoston palvelimelle, sekä handler, joka käynnistää palvelun uudelleen vain, jos tiedosto muuttuu.
+
+Testaus:
+Asetuksen voimaantulo varmistettiin komennolla:
+sudo -u postgres psql -c "SHOW log_connections;"
+
+[Tähän screenshot: SHOW log_connections; tulos, joka näyttää "on"]
+
+d) Paikka remonttiin (Itsekorjautuvuus)
+Tässä vaiheessa simuloitiin vakava virhetilanne poistamalla PostgreSQL:n kriittinen konfiguraatiokansio komennolla:
+sudo rm -rf /etc/postgresql/17/main/
+
+Tämän seurauksena palvelu lakkasi toimimasta. Koska pelkkä tiedoston palauttaminen ei riittänyt palauttamaan tietokantamoottorin toimintaa (socket-tiedostot puuttuivat), suoritettiin seuraavat korjaavat toimenpiteet:
+
+Käytettiin pg_createcluster-komentoa uuden clusterin luomiseen.
+
+Ajettiin Ansible-playbook uudelleen, jolloin se palautti halutut asetukset ja varmisti kansion oikeudet.
+
+[Tähän screenshot: Virheilmoitus kansion poiston jälkeen JA screenshot pg_createcluster / onnistunut korjausajo]
+
+e) Idempotenssi
+Lopuksi osoitettiin Ansiblen idempotenssi ajamalla sama playbook uudelleen tilanteessa, jossa kaikki oli jo kunnossa.
+
+Lopputulos:
+Playbookin raportti näytti changed=0. Tämä todistaa, että Ansible tunnistaa järjestelmän olevan jo tavoitetilassa eikä tee tarpeettomia muutoksia.
+
+[Tähän screenshot: Viimeinen Ansible-ajo, jossa näkyy changed=0]
+
+3. Pohdinta ja opit
+Tehtävän aikana havaittiin, että PostgreSQL on riippuvainen paitsi konfiguraatiotiedostoista, myös oikeasta hakemistorakenteesta ja cluster-määrityksistä. Ansible osoittautui tehokkaaksi työkaluksi järjestelmän palauttamisessa toimintakuntoon jopa täydellisen konfiguraatiotuhon jälkeen. Työskentely opetti IaC-ajattelua (Infrastructure as Code) ja vianetsintää systemd-palveluiden parissa.
+
+Vinkki: Voit kopioida tämän tekstin suoraan Word-dokumenttiisi ja sijoittaa screenshotit merkittyihin kohtiin. Jos Caddy-tehtävä on vielä samassa tiedostossa, muista varmistaa, että otsikot erottuvat selvästi!
